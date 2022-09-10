@@ -1,8 +1,10 @@
 const { ApolloServer, gql } = require("apollo-server");
+const { buildFederatedSchema } = require("@apollo/federation");
+const findEasiestTrail = require("./findEasiestTrail");
 const trails = require("./trail-data.json");
 
 const typeDefs = gql`
-  type Trail {
+  type Trail @key(fields: "id") {
     id: ID!
     name: String!
     status: TrailStatus!
@@ -10,6 +12,11 @@ const typeDefs = gql`
     groomed: Boolean!
     trees: Boolean!
     night: Boolean!
+  }
+
+  extend type Lift @key(fields: "id") {
+    id: ID! @external
+    easyWayDown: Trail!
   }
 
   enum Difficulty {
@@ -50,12 +57,25 @@ const resolvers = {
       updatedTrail.status = status;
       return updatedTrail;
     }
+  },
+  Trail: {
+    __resolveReference: ({ id }) => trails.find(trail => trail.id === id)
+  },
+  Lift: {
+    easyWayDown: lift => {
+      const waysDown = trails.filter(trail => trail.lift.includes(lift.id));
+      return findEasiestTrail(waysDown);
+    }
   }
 };
 
 const server = new ApolloServer({
-  typeDefs,
-  resolvers
+  schema: buildFederatedSchema([
+    {
+      typeDefs,
+      resolvers
+    }
+  ])
 });
 
 server.listen(4002).then(({ url }) => {

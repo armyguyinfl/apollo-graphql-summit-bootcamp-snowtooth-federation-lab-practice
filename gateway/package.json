@@ -1,5 +1,5 @@
 {
-  "name": "lift-graphql-api",
+  "name": "snowtooth-gateway-api",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,7 +10,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@apollo/federation": "^0.6.0",
+    "@apollo/gateway": "latest",
     "apollo-server": "latest",
     "graphql": "latest"
   },
